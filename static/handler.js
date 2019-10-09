@@ -10,10 +10,11 @@ let min_id;//id сообщения с которого будет идти за�
 let edite_msgs = {};//редактируемые
 
 let r = 0;
-let g=0;
-let b=0;
+let g = 0;
+let b = 0;
 
 colors = [];
+
 //generation set of nickname colors
 for(let k = 0;k <= 162*4; k++){
     let i = k;
@@ -138,7 +139,16 @@ if(getCookie("username") === undefined) {
     username = getCookie("username");
 }
 
-var socket = io.connect('http://localhost');
+let link = window.location.href;
+function parseUrl(str){
+    let domain = str.match(/(www|http:|https:)+[^\s]+[\w]/)
+    if(domain)
+        return 'http://'+domain[0].match(/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/)[0]
+    return null
+}
+
+let server = parseUrl(link) || 'http://localhost'
+var socket = io.connect(server);
 
 //ответ на запрос сервера
 socket.on('serv_request', function (data) {
