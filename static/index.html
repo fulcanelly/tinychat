@@ -1,0 +1,612 @@
+<html>
+
+<meta charset="utf-8">
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<head>
+	<title>chatizm</title>
+	<script src="https://cdn.socket.io/socket.io-1.7.3.js"></script>
+</head>
+<body>
+<style>
+	about{  
+		color: #000 !important;
+  	}
+	body{
+		background: #ffffff;
+	}
+	.loader{
+		width: 40px;
+		right:20px;
+		border-radius: 100%;
+		position: relative;
+		margin: 0 50%;
+		margin-bottom:10px; 
+	}
+
+
+	.loader span{
+		display: inline-block;
+		width: 5px;
+		height: 20px;
+		background-color: #3498db;
+	}
+
+	.loader span:nth-child(1){
+		animation: grow 1s ease-in-out infinite;
+	}
+
+	.loader span:nth-child(2){
+		animation: grow 1s ease-in-out 0.15s infinite;
+	}
+
+	.loader span:nth-child(3){
+		animation: grow 1s ease-in-out 0.30s infinite;
+	}
+
+	.loader span:nth-child(4){
+		animation: grow 1s ease-in-out 0.45s infinite;
+	}
+
+	@keyframes grow{
+	  0%, 100%{
+	    -webkit-transform: scaleY(1);
+	    -ms-transform: scaleY(1);
+	    -o-transform: scaleY(1);
+	    transform: scaleY(1);
+	  }
+
+	  50%{
+	    -webkit-transform: scaleY(1.8);
+	    -ms-transform: scaleY(1.8);
+	    -o-transform: scaleY(1.8);
+	    transform: scaleY(1.8);
+	  }
+	}
+	/**/
+	::-moz-focus-outer, ::-moz-focus-inner {
+		border: 0;
+		padding: 0;
+	}
+
+	#lmore{
+		width: 100%;
+	}
+
+	.but {
+		background: #3498db;
+		border: none;
+		padding: 5px 24px;
+		color: white;
+		font-size: 20px;
+		border-radius: 9px;
+		outline: none;
+		transition: background-color 0.1s linear;
+	}
+
+	.but:hover{
+		background-color: #276c9c;	
+	}
+
+	.but:active{
+		background: #13344a;
+	}
+
+	input {
+		border: 1px solid #3498db;
+		border-radius: 3px;
+		line-height: 32px;
+		padding: 0 16px;
+		outline: 0;
+		font-size: 14px;
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.msg-table {
+		margin-top: 1cm;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.reverse{
+		flex-direction: column-reverse;
+	}
+
+	.msg-table {
+		max-width: 400px;
+		margin: auto;
+		background: #eee;
+		padding: 32px;
+	}
+
+	.msg {
+		width: 100%;
+		padding-top: 3px;
+		margin-bottom: 10px;
+		border-bottom: 2px solid #ddd;
+		background-color: #d1d1d1;
+		text-align: left;
+		text-align-last: left;
+		word-wrap: break-word;
+		margin-bottom: 10px;
+	}
+	.msg:hover{
+		background-color: #929292;
+	}
+
+	.name{
+		font-family: "monospace";
+		width: 100%;
+		margin-top: 10px;
+		margin-left: 10px;
+
+	}
+	.text{
+		width: 90%;
+		margin-left: 10px;
+		margin-right: 10px;
+		margin-bottom: 10px;
+	}
+	.cbalink{
+		display: none;
+	}
+
+
+
+	#field{
+		margin-bottom: 20px;
+	}
+
+	/*waring*/
+	.alert{
+		padding:15px;
+		margin-bottom:20px;
+		border: 1px solid transparent;
+		border-radius:4px
+	}
+	.alert-warning{
+		color:#8a6d3b;
+		background-color:#fcf8e3;
+		border-color:#faebcc
+	}
+	/*var*/
+	body{
+		margin: 0px;
+		margin-top: 0px;
+	}
+
+	.page_header {
+		max-height: 80px;
+		position: fixed;
+		z-index: 10;
+		background-color: #ffffff;
+		width: 100%;
+		border-bottom: 1px solid #e3e6e8;
+	}
+	.page_header .content {
+		position: relative;
+		max-width: 480px;
+		margin: 0 auto;
+		/*  border-radius: 0 !important;*/
+	}
+	.page_header .content .text {
+		padding: 24px 24px 22px 24px;
+		font-size: 22px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.bold {
+		color: #212121;
+		font-weight: 700;
+	}
+
+	.main{
+		padding-top: 100px;
+		width: 100%;
+	}
+
+	.kekeke {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.timestamp{
+		float: right;
+		color: #7d7d7d;
+		margin-right: 20px;
+		font-size: 12px;
+	}
+	.text{
+		font-family: monospace;
+		font-size: 14px;
+		margin-top:10px;
+	}
+	.normalbut{
+		margin: 20%;
+		margin-top: 20px;
+		margin-bottom: 0px;
+	}
+
+	#online{
+		font-weight: 700;
+		font-size: 20px;
+	}
+	.filler{
+		width: 100%;
+		height: 100%;
+		background-color: #1c1d25;
+		opacity: 0.5;
+		position: fixed;
+	}
+
+</style>
+
+<div class="page_header">
+	<div class="content">
+		<div class="text bold kekeke">
+			<a herf='./about' class='about'>Чатик</a>
+			<div id="online">online: 1</div>
+			<div class=''>
+			<!--<button id='switcher' class="but" onclick="switchPage()">edit</button>-->
+			</div>
+		</div>
+	</div>
+</div>
+<div class="main">
+	<div id="msg-table" class="msg-table reverse" id="out">
+		<button id='loadold' onclick="loadold()" class="but">load more</button>
+		<div class="reverse">
+			<div class="loader" id="loader">
+	          <span></span>
+	          <span></span>
+	          <span></span>
+	          <span></span>
+			</div>
+			<div id="adder">
+			</div>
+	
+		</div>
+		<div id="field">
+			<input id='input' type="text" placeholder="text" >
+		</div>
+
+	</div>
+</div>
+	<script>
+	var spec_ids = [];
+	let users = [];
+	let loadoldElm = $('loadold');
+	loadoldElm.style.display = 'none';
+	let queue = true;		//пока подключения к серверу нет сообщения хранятся в очереди
+	let queue_array = []; //очередь сообщений
+	let step_one = true; //одноразовая переменная для отправки запроса инициализации
+
+	let min_id;//id сообщения с которого будет идти загрузка старых сообщений
+	let edite_msgs = {};//редактируемые
+
+	let r = 0;
+	let g=0;
+	let b=0;
+
+	colors = [];
+	//generation set of nickname colors
+	for(let k = 0;k <= 162*4; k++){
+		let i = k;
+		if(i<162)r=162;
+		if(i<162)g++;
+
+		if(i>162&&i<162*2)r--;
+		if(i>162&&i<162*2)g=162;
+
+		if((i>162*2)&&i<162*3)r=0;
+		if(i>162*2&&i<162*3)g=162;
+		if(i>162*2&&i<162*3)b++;
+
+		if(i>162*3&&i<162*4)r=0;
+		if(i>162*3&&i<162*4)g--;
+		if(i>162*3&&i<162*4)b=162;
+
+
+		let tr=(r&255)<<16;
+		let tg=(g&255)<<8;
+		let tb=b&255;
+
+		let c = (tr+tg+tb).toString(16);
+		if(c.length<6){
+			c = "0".repeat(6-c.length)+c
+		}
+		c='#'+c;
+
+		if(i%10==0){
+			//ctx.fillStyle = c;
+			colors.push(c);
+			//ctx.fillRect(k,0,5,100);
+		}
+	}
+
+	//
+	function hashCode(s) {
+		var h = 0, l = s.length, i = 0;
+		if ( l > 0 )
+			while (i < l)
+				h = (h << 5) - h + s.charCodeAt(i++) | 0;
+		return h;
+	};
+
+	//изменение цвета ников
+	function colorize(){
+		users = document.getElementsByClassName('name');
+		let user;
+		let str;
+		for (var i =0;i<users.length;i++) {
+			user = users[i].classList.value;
+			str = user.slice(5);
+
+			let hash = hashCode(str)%65;
+			let index = Math.abs(hash);
+
+			users[i].style.color=colors[index];
+		}
+	}
+
+	function $(name){
+		return document.getElementById(name);
+	}
+
+	function getCookie(name) {
+		var matches = document.cookie.match(new RegExp(
+			"(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+		));
+		return matches ? decodeURIComponent(matches[1]) : undefined;
+	}
+
+	function setCookie(name, value, options) {
+		options = options || {};
+
+		var expires = options.expires;
+
+		if (typeof expires == "number" && expires) {
+			var d = new Date();
+			d.setTime(d.getTime() + expires * 1000);
+			expires = options.expires = d;
+		}
+		if (expires && expires.toUTCString) {
+			options.expires = expires.toUTCString();
+		}
+
+		value = encodeURIComponent(value);
+
+		var updatedCookie = name + "=" + value;
+
+		for (var propName in options) {
+			updatedCookie += "; " + propName;
+			var propValue = options[propName];
+			if (propValue !== true) {
+				updatedCookie += "=" + propValue;
+			}
+		}
+		document.cookie = updatedCookie;
+	}
+
+	let input = $("input");
+	//send msg hen user press enter
+	input.addEventListener("keyup", function(event) {
+		if (event.keyCode === 13) {
+			if(input.value.length==0){
+				return
+			}
+			send();
+		}
+	});
+
+
+	function randomStr() {
+		return Math.random().toString(36).substring(2, 15);
+	}
+
+	//генерация ника
+	let username;
+	if(getCookie("username") === undefined) {
+		username = randomStr();
+		setCookie("username",username);
+	}else{
+		username = getCookie("username");
+	}
+	
+	var socket = io.connect('http://localhost');
+
+	//ответ на запрос сервера
+	socket.on('serv_request', function (data) {
+		//console.log(data);
+		let answer;
+		switch (data.request) {
+			case("get_username"):
+				answer = {username: username};
+				break;
+			case("queue_off"):
+				queue = false;
+				answer = {};
+				break;
+			default:
+				answer = "bad request";
+				break;
+		}
+	//	console.log(answer);
+		socket.emit('serv_request', answer);
+	});
+
+	//отвечаеь за то чтобы нельзя было загружать пока не загружены запрашиваемые сообщения
+	let cli_request_lock = false;
+
+	let loadButton = $("loadold").outerHTML;
+	let loaderInner = $("loader").innerHTML;
+	let outerClone = $("loader").cloneNode();
+
+	outerClone.id ='loadold';
+	outerClone.style.display = '';
+	let tempLoader = outerClone.outerHTML.replace('><',`>${loaderInner}<`)
+	
+	//загружает старые сообщения
+	function loadold() {
+		if(!cli_request_lock){
+			//заменяем кнопку на псевдо индикатор загрузки
+			let oldLoad = $("loadold");
+			oldLoad.outerHTML = tempLoader;
+			cli_request_lock = true
+
+			socket.emit('cli_request',{request:'load',from:min_id});
+		}
+	}
+
+	//формирует шаблон сообщения
+	function msgTemplate(msg){
+		let msg_body = document.createElement('div');
+		msg_body.classList.value = "msg";
+		if(msg.spec_id){
+			msg_body.id = msg.spec_id;
+		}
+		let name = document.createElement('div');
+		name.classList.value = `name ${msg.username}`;
+		name.innerText = msg.username;
+		let time = document.createElement('div');
+		time.classList.value = 'timestamp';
+		time.innerText = msg.time;
+		name.innerHTML += time.outerHTML;
+		let text = document.createElement('div');
+		text.classList.value = 'text';
+		text.innerText = msg.text;
+		text.innerHTML = text.innerHTML.replace(/(((http)s?:\/)[^\s]+)/g,'<a href=\'$1\'>$1</a>');
+		msg_body.innerHTML = name.outerHTML+text.outerHTML;
+		return msg_body.outerHTML;
+	}
+
+	function addMsg(data,element){
+		for(let i =0;i<data.length;i++){
+			let msg = data[i];
+			let template = msgTemplate(msg);
+			$(element).outerHTML += template;
+			if(msg.spec_id){
+				edite_msgs[msg.spec_id]=msg
+			}
+		}
+		colorize()
+	}
+
+	function editMsg(id,data){
+		for(let i in data.msg[0]){
+			let item = data.msg[0][i];
+			edite_msgs[id][i]=item
+		}
+		let thismsg = $(id);
+		thismsg.outerHTML = msgTemplate(edite_msgs[id]);
+		colorize()
+	}
+
+	let loader = $("loader");
+	//вызывается при получении сообщения
+	socket.on('new_msg', function (data) {
+		console.log(data)
+
+		let type = data.type;
+		loader.style.display = 'none';
+
+		//проверка: если id совпадает хотя бы с одним из spec_ids тогда изменяем его
+		let index = spec_ids.indexOf(data.spec_id);
+		if(index!=-1){
+			editMsg(data.spec_id,data);
+			return;
+		}
+
+		//а вот это хз чо за дичь
+		if(data.reverse)
+			data.msg = data.msg.reverse()
+		data = data.msg;
+		//конец дичи
+
+		if(type=='old'){
+			
+			let ids=[];
+			for(let i in data){
+				ids.push(data[i].id)
+			}
+
+			min_id = Math.min(...ids);
+			console.log(min_id)
+			
+			//если сообщений меньше 10(на это будет указыывать то что min id == 1) тогда прячем кнопку загрузки
+			if(data.length===0 || min_id<=1){
+				$("loadold").style.display = 'none';
+			}else{
+				let tempold = $("loadold");
+				$("loadold").outerHTML = loadButton;
+				$("loadold").style.display = '';
+			}
+		}
+
+		let element;
+		if(type === 'new')
+			element = 'adder';
+		else{
+			cli_request_lock = false;
+			element = 'loadold';
+		}
+		addMsg(data, element);
+		
+	});
+
+	const onlineElm = $("online");
+	socket.on('actions',function (online) {
+		//console.log(online);
+		if(online.notice){
+			console.log(online.notice);
+		}else if(online.count){
+			onlineElm.innerText = onlineElm.innerText.replace(/\d+/,online.count);
+		}
+	});
+
+	function send(){
+		//добавить сообщение
+		let spec_id = randomStr();//генерация id
+		//добавление шаблона сообщения
+		let template = {
+			text: input.value,
+			spec_id:spec_id,
+			time:"Sending...",
+			username:username
+		};
+		//добавление id в список
+		spec_ids.push(spec_id);
+		//добавление
+		addMsg([template],"adder");
+		console.log(template)
+		if(queue){
+			queue_array.push(template)
+		}else {
+			socket.emit('send', template);
+		}
+		input.value = '';
+	}
+
+	setInterval(function () {
+		if(queue_array.length>0 && !queue){
+			for(let i in queue_array){
+				socket.emit('send',queue_array[i]);
+			}
+			queue_array = [];
+		}
+		if(!queue && step_one){
+			socket.emit('cli_request',{request:'load'});
+			step_one = false;
+		}
+	},10);
+
+	socket.on('disconnect', function () {
+		queue = true;
+	});
+
+
+
+	</script>
+</body>
+</html>
