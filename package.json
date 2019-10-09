@@ -1,0 +1,30 @@
+{
+  "name": "tinychat",
+  "version": "1.0.0",
+  "description": "simple fast express web-chat",
+  "main": "server.js",
+  "dependencies": {
+    "ember-cli": "^3.11.0",
+    "express": "^4.17.1",
+    "sqlite3": "^4.1.0",
+    "synaptic": "^1.1.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "sudo node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fulcanelly/tinychat.git"
+  },
+  "keywords": [
+    "node",
+    "chat"
+  ],
+  "author": "fulcanelly",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/fulcanelly/tinychat/issues"
+  },
+  "homepage": "https://github.com/fulcanelly/tinychat#readme"
+}
