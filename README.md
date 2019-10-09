@@ -12,5 +12,6 @@ You can run it just writing in the shell below command :
 ```sh
   sudo node server.js
 ```
+And after go to http://localhost in your browser (root permissions needed to using 80 port.)
 
-root permissions needed to using 80 port.
+
