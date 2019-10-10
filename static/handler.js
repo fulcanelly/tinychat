@@ -143,7 +143,8 @@ let link = window.location.href;
 function parseUrl(str){
     let domain = str.match(/(www|http:|https:)+[^\s]+[\w]/)
     if(domain)
-        return 'http://'+domain[0].match(/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/)[0]
+      //  console.log(domain)[0][0]
+        return domain//'http://'+domain[0].match(/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/)[0]
     return null
 }
 
