@@ -122,8 +122,8 @@ class banlist {
 	//clearer handler
 	static clearer()
 	{
-		return new Promise(setInterval(() => {
-			db.run('DELTE FROM blist where ftime + ? < ?', this.clearInterval, Date.now())
+		return new Promise((res) => setInterval(() => {
+			db.run('DELETE FROM blist where (ftime + ?) < ?', this.clearInterval, Date.now())
 		}, 3000))
 	} 
 }
