@@ -118,13 +118,17 @@ class banlist {
 		})
 	}
 
-	static clearInterval = 120 * 1000;
+	static clearInterval = 60 * 60 * 24 * 1000;
 	//clearer handler
 	static clearer()
 	{
-
+		return new Promise(setInterval(() => {
+			db.run('DELTE FROM blist where ftime + ? < ?', this.clearInterval, Date.now())
+		}, 3000))
 	} 
 }
+
+banlist.clearer();
 
 class chdb {
 	static addMsg(msg){
