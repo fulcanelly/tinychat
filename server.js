@@ -30,7 +30,101 @@ db.run(
 db.run(
 	`CREATE TABLE 
 	IF NOT EXISTS blist 
-	(ip BLOB)`,err => console.log(err));
+	(ip BLOB, 
+	banrate INTEGER,
+	ftime BLOB,
+	count INTEGER,
+	state BLOB
+	)`,err => console.log(err));
+
+class banlist {
+
+	static addUser(ip) {
+		return new Promise((res) => {
+			let claim = `INSERT INTO blist(ip, banrate, ftime, count) VALUES(?, ?, ?, ?)`;
+			db.run(claim, ip, 1, Date.now(), 0, (_) => res(true))
+		})
+	}
+
+	static interval = 60 * 1000;
+	//in mc
+	static allowedLimit = 30;
+	//count of messages per interval
+	
+	static ban(ip)
+	{
+		return new Promise((res) => {
+			db.all('SELECT * from blist where ip = ?', ip, async(err, row) => {
+				let user = row[0]
+				if(user.state == "baned")
+				{
+					res(true);
+					return;
+				}
+				else {
+					user.state = "baned"
+					user.banrate++
+				}
+				db.all(`UPDATE blist SET state=?, banrate=? WHERE ip =?`, user.state, user.banrate, ip)
+			})
+		})
+	}
+
+	static userCanSend(ip){
+		return new Promise(async(res) => {
+			db.all('SELECT * from blist where ip = ?', ip, async(err, row) => {
+				let user = row[0]
+				//if user not exist yet then add him
+				if(!user)
+				{
+					await this.addUser(ip)
+					let canSend = await this.userCanSend(ip)
+					res(canSend);
+				}
+
+				if(this.interval*user.banrate + user.ftime < Date.now())
+				{
+					//user.ftime = Date.now()
+					user.count = 0;
+				} 
+
+				let canSend = true
+				if(user.count >= this.allowedLimit)
+				{
+					canSend = false
+					this.ban(ip);
+				}	
+				
+				res(canSend)
+			}) 
+		})
+	}
+
+	//static update(ip){
+	static add(ip) {
+		return new Promise((res) => {
+		 	db.all('SELECT * from blist where ip=?', ip, (err, row) => {
+				let user = row[0]
+
+				if(this.interval*user.banrate/2 + user.ftime < Date.now())
+				{
+					user.ftime = Date.now()
+					user.count = 0;
+				} 
+
+				user.count++;
+				db.run('UPDATE blist SET count=?, ftime=?, state="normal" WHERE ip =?', user.count, user.ftime, ip)
+			})
+		})
+	}
+
+	static clearInterval = 120 * 1000;
+	//clearer handler
+	static clearer()
+	{
+
+	} 
+}
 
 class chdb {
 	static addMsg(msg){
@@ -141,14 +235,20 @@ io.sockets.on('connection', function (socket) {
         	break;
 		}
   	});
-
+	  //console.log("ip: " + socket.request.connection.remoteAddress);
+	  console.log();
   	//ожидание получения сообщения
 	socket.on('send', async (data) => {
+		let ip = socket.handshake.address
+		if(! await banlist.userCanSend(ip))
+			return;
+		banlist.add(ip)
 		//проверка и подготовка к сохранению в бд
 		if(data.text.length == 0)
 			return;
 		
 		console.log(data);
+
 		let text = data.text.substring(0, 4095)      
 		let username = users[id];
 
