@@ -134,7 +134,7 @@ class chdb {
 	static addMsg(msg){
 		let username = msg.username.slice(0, 40);
 		let text = msg.text.slice(0, 4000);
-		let time = msg.time.slice(0, 40);
+		let time = msg.time
 
 		db.run(`
 		INSERT INTO messages(username, text, time)
